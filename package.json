@@ -1,0 +1,27 @@
+{
+  "name": "final-project-cs-493-ultimate",
+  "version": "1.0.0",
+  "description": "Implementation of the Tarpulin API",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osu-cs493-sp19/final-project-cs-493-ultimate.git"
+  },
+  "author": "Adam Ruark, Camden Sladcik, and Jonathon Buntin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/osu-cs493-sp19/final-project-cs-493-ultimate/issues"
+  },
+  "homepage": "https://github.com/osu-cs493-sp19/final-project-cs-493-ultimate#readme",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.9.1",
+    "mysql": "^2.17.1"
+  }
+}
