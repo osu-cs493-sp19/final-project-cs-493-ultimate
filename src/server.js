@@ -8,7 +8,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use('/', require('./api'));
 
-app.use('*', (req, res, next) => {
+app.use('*', (req, res) => {
     res.status(404).json({
         error: `Requested resource ${req.originalUrl} does not exist`
     });
