@@ -3,7 +3,7 @@ version: '3.7'
 services:
   api:
     build: .
-    image: tarpulin-api
+    image: tarpaulin-api
     restart: always
     ports:
       - 8000:8000
@@ -16,10 +16,10 @@ services:
     restart: always
     volumes:
       - mysql-data:/var/lib/mysql
-      # - ./db-init/:/docker-entrypoint-initdb.d
+      - ./db-init/:/docker-entrypoint-initdb.d
     env_file: global.env
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
 volumes:
   mysql-data:
-    name: tarpulin-mysql-data
+    name: tarpaulin-mysql-data
