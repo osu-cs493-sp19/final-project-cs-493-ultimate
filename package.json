@@ -1,7 +1,7 @@
 {
   "name": "final-project-cs-493-ultimate",
   "version": "1.0.0",
-  "description": "Implementation of the Tarpulin API",
+  "description": "Implementation of the Tarpaulin API",
   "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
