@@ -7,11 +7,11 @@ const { extractValidFields } = require('../lib/validate');
 
 
 const CourseSchema = {
-    subject: { required: true },
-    number: { required: true },
-    title: { required: true },
-    term: { required: true },
-    instructorId: { required: true}
+    subject: { type: 'string', required: true },
+    number: { type: 'number', required: true },
+    title: { type: 'string', required: true },
+    term: { type: 'string', required: true },
+    instructorId: { type: 'number', required: true}
 };
 exports.CourseSchema = CourseSchema;
 

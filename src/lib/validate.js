@@ -1,16 +1,9 @@
-// This doesn't work
-/* exports.validateAgainstSchema = function (obj, schema) {
+exports.validateAgainstSchema = function (obj, schema) {
     return obj && Object.keys(schema).every(
         field => (!schema[field].required || obj[field]) && (!obj[field] || (typeof obj[field]) === schema[field].type)
     );
-}; */
+};
 
-//this was taken from Assignment 3
-exports.validateAgainstSchema = function (obj, schema) {
-    return obj && Object.keys(schema).every(
-      field => !schema[field].required || obj[field]
-    );
-  };
 
 exports.extractValidFields = function (obj, schema) {
     let validObj = {};
