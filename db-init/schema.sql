@@ -11,3 +11,25 @@ CREATE TABLE users (
     PRIMARY KEY (id),
     UNIQUE KEY (`email`)
 );
+
+CREATE TABLE assignments (
+    `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
+    `courseId`        mediumint(9)                            NOT NULL,
+    `title`      VARCHAR(255)                            NOT NULL,   
+    `description`     VARCHAR(255)                            NOT NULL,
+    `points`  mediumint(9)                           NOT NULL,
+    `due`      VARCHAR(255)  NOT NULL,
+
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE submissions (
+    `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
+    `assignmentId`        mediumint(9)                            NOT NULL,
+    `studentId`        mediumint(9)                            NOT NULL,
+    `description`      VARCHAR(255)                            NOT NULL,   
+    `timestamp`     VARCHAR(255)                            NOT NULL,
+    `file`      VARCHAR(255)  NOT NULL,
+
+    PRIMARY KEY (id)
+);
