@@ -2,7 +2,8 @@ CREATE DATABASE IF NOT EXISTS `tarpaulin`;
 
 USE `tarpaulin`;
 
-CREATE TABLE users (
+
+CREATE TABLE IF NOT EXISTS users (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
     `name`      VARCHAR(255)                            NOT NULL,   
     `email`     VARCHAR(255)                            NOT NULL,
@@ -16,7 +17,7 @@ CREATE TABLE users (
 INSERT INTO users VALUES 
     (0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin');
 
-CREATE TABLE assignments (
+CREATE TABLE IF NOT EXISTS assignments (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
     `courseId`        mediumint(9)                            NOT NULL,
     `title`      VARCHAR(255)                            NOT NULL,   
@@ -27,7 +28,7 @@ CREATE TABLE assignments (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE submissions (
+CREATE TABLE IF NOT EXISTS submissions (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
     `assignmentId`        mediumint(9)                            NOT NULL,
     `studentId`        mediumint(9)                            NOT NULL,
@@ -37,3 +38,26 @@ CREATE TABLE submissions (
 
     PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS `courses` (
+  `id` mediumint(9)  NOT NULL AUTO_INCREMENT,
+  `subject` varchar(10) NOT NULL ,
+  `number` smallint(3)  NOT NULL ,
+  `title` varchar(255) NOT NULL ,
+  `term` varchar(10) NOT NULL ,
+  `instructorId` mediumint(9) ,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `NO DUPS` (`number`,`subject`),
+  KEY `FK_courses_users` (`instructorId`),
+  CONSTRAINT `FK_courses_users` FOREIGN KEY (`instructorId`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS `enrollment` (
+	`courseId` MEDIUMINT(9) NOT NULL,
+	`userId` MEDIUMINT(9) NOT NULL,
+	`isInstructor` BINARY(1) NULL DEFAULT '0',
+	INDEX `FK_enrollment_courses` (`courseId`),
+	INDEX `FK_enrollment_users` (`userId`),
+	CONSTRAINT `FK_enrollment_courses` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT `FK_enrollment_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+)
