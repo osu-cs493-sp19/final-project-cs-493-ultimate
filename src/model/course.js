@@ -12,8 +12,24 @@ const CourseSchema = {
     title: { type: 'string', required: true },
     term: { type: 'string', required: true },
     instructorId: { type: 'number', required: true}
-};
+}
 exports.CourseSchema = CourseSchema;
+
+const patchCourseSchema = {
+    subject: { type: 'string', required: false },
+    number: { type: 'number', required: false },
+    title: { type: 'string', required: false },
+    term: { type: 'string', required: false },
+    instructorId: { type: 'number', required: false}
+}
+exports.patchCourseSchema = patchCourseSchema;
+
+const RosterSchema = {
+    add: { type: 'object', required: true},
+    remove: { type: 'object', required: true}
+}
+exports.RosterSchema = RosterSchema;
+
 
 function getCoursesCount(){
     return new Promise((resolve, reject) => {
@@ -163,3 +179,42 @@ function getAssignmentsByCourseId(id){
     });
 }
 exports.getAssignmentsByCourseId = getAssignmentsByCourseId;
+
+function insertStudentsInCourse(courseId, userIds){
+    return new Promise((resolve, reject) =>{
+        const rows = [];
+        userIds.forEach(id => {
+            rows.push([courseId, id]);
+        });
+        db.query(
+            'INSERT INTO enrollment (courseId, userId) VALUES ?; DELETE FROM enrollment WHERE courseId = ? AND userId = ?',
+            [addRows, removeRows],
+            (err, result) => {
+                if(err){
+                    reject(err);
+                } else{
+                    resolve(result.affectedRows > 0);
+                }
+            }
+        );
+    });
+}
+exports.insertStudentsInCourse = insertStudentsInCourse;
+
+
+function removeStudentsInCourse(courseId, userIds){
+    return new Promise((resolve, reject) =>{
+        db.query(
+            'DELETE FROM enrollment WHERE courseId = ? AND userId = ?',
+            [courseId, [userIds]],
+            (err, result) => {
+                if(err){
+                    reject(err);
+                } else{
+                    resolve(result.affectedRows > 0);
+                }
+            }
+        );
+    });
+}
+exports.removeStudentsInCourse = removeStudentsInCourse;
