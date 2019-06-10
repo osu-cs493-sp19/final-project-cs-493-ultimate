@@ -1,5 +1,5 @@
 ---
-version: '3.7'
+version: '3.3'
 services:
   api:
     build: .
@@ -11,6 +11,8 @@ services:
     environment:
       MYSQL_PORT: 3306
       MYSQL_HOST: mysql
+      REDIS_PORT: 6379
+      REDIS_HOST: redis
   mysql:
     image: mysql:5
     restart: always
@@ -20,6 +22,9 @@ services:
     env_file: global.env
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+  redis:
+    image: redis:latest
+    restart: always
+    
 volumes:
   mysql-data:
-    name: tarpaulin-mysql-data
