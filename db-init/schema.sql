@@ -51,3 +51,13 @@ CREATE TABLE IF NOT EXISTS `courses` (
   KEY `FK_courses_users` (`instructorId`),
   CONSTRAINT `FK_courses_users` FOREIGN KEY (`instructorId`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS `enrollment` (
+	`courseId` MEDIUMINT(9) NOT NULL,
+	`userId` MEDIUMINT(9) NOT NULL,
+	`isInstructor` BINARY(1) NULL DEFAULT '0',
+	INDEX `FK_enrollment_courses` (`courseId`),
+	INDEX `FK_enrollment_users` (`userId`),
+	CONSTRAINT `FK_enrollment_courses` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT `FK_enrollment_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+)
