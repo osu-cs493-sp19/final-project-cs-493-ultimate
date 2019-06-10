@@ -4,7 +4,6 @@ exports.validateAgainstSchema = function (obj, schema) {
     );
 };
 
-
 exports.extractValidFields = function (obj, schema) {
     let validObj = {};
     Object.keys(schema).forEach((field) => {
