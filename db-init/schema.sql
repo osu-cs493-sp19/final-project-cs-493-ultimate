@@ -1,4 +1,5 @@
 CREATE DATABASE IF NOT EXISTS `tarpaulin`;
+
 USE `tarpaulin`;
 
 CREATE TABLE users (
@@ -11,3 +12,6 @@ CREATE TABLE users (
     PRIMARY KEY (id),
     UNIQUE KEY (`email`)
 );
+
+INSERT INTO users VALUES 
+    (0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin');
