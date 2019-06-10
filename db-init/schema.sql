@@ -1,4 +1,5 @@
 CREATE DATABASE IF NOT EXISTS `tarpaulin`;
+
 USE `tarpaulin`;
 
 CREATE TABLE users (
