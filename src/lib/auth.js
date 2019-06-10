@@ -33,7 +33,6 @@ exports.authenticate = function(user) {
                     reject(err);
                 } else {
                     if(result.length == 0) {
-                        console.log('here');
                         resolve([false, null]);
                     } else {
                         const status = await bcrypt.compare(santizedUser.password, result[0].password);
@@ -66,6 +65,20 @@ exports.validateJwt = function(req, res, next) {
     }
 }
 
+exports.validateJwtManual = function(req) {
+    const authHeader = req.get('Authorization') || '';
+    const authHeaderParts = authHeader.split(' ');
+    const token = authHeaderParts[0] === 'Bearer' ? authHeaderParts[1] : null;
+
+    try {
+        const payload = jwt.verify(token, jwtSecret);
+        return [true, payload.id];
+    } catch (err) {
+        console.error(err);
+        return [false, null];
+    }
+}
+
 exports.getRole = function(req, res, next) {
     mysqlPool.query(
         'SELECT role FROM users WHERE id = ?',
@@ -82,4 +95,21 @@ exports.getRole = function(req, res, next) {
             }
         }    
     );
+}
+
+exports.getRoleManual = function(id) {
+    return new Promise((resolve, reject) => {
+        mysqlPool.query(
+            'SELECT role FROM users WHERE id = ?',
+            id,
+            (err, result) => {
+                if(err) {
+                    console.error(err);
+                    reject();
+                } else {
+                    resolve(result[0].role);
+                }
+            }    
+        );
+    });  
 }
