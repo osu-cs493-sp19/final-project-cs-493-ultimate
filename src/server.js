@@ -1,11 +1,13 @@
 const express = require('express');
 const morgan = require('morgan');
+const { rateLimit } = require('./lib/limits');
 const app = express();
 
 const PORT = process.env.PORT || 8000;
 
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(rateLimit);
 app.use('/', require('./api'));
 
 app.use('*', (req, res) => {
