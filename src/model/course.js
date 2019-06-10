@@ -129,3 +129,37 @@ function deleteCourseById(id){
     });
 }
 exports.deleteCourseById = deleteCourseById;
+
+function getStudentsByCourseId(id){
+    return new Promise((resolve, reject) => {
+        db.query(
+            'SELECT userId FROM enrollment WHERE courseId = ?',
+            id,
+            (err, results) => {
+                if(err){
+                    reject(err);
+                } else{
+                    resolve(results);
+                }
+            }
+        );
+    });
+}
+exports.getStudentsByCourseId = getStudentsByCourseId;
+
+function getAssignmentsByCourseId(id){
+    return new Promise((resolve, reject) => {
+        db.query(
+            'SELECT id FROM assignments WHERE courseId = ?',
+            id,
+            (err, results) => {
+                if(err){
+                    reject(err);
+                } else{
+                    resolve(results);
+                }
+            }
+        );
+    });
+}
+exports.getAssignmentsByCourseId = getAssignmentsByCourseId;

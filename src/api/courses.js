@@ -10,12 +10,12 @@ const { getCoursesPage,
         insertNewCourse,
         getCourseById,
         updateCourseById,
-        deleteCourseById } = require('../model/course');
+        deleteCourseById,
+        getStudentsByCourseId,
+        getAssignmentsByCourseId } = require('../model/course');
 
-const { validateAuth,
-    authenticate,
-    validateJwt,
-    getRole } = require('../lib/auth');
+const { validateJwt,
+        getRole } = require('../lib/auth');
 
 
 router.get('/', async (req, res) => {
@@ -39,9 +39,9 @@ router.get('/', async (req, res) => {
     }
 });
 
-//router.post('/', validateJwt, getRole, async (req, res) => {
-router.post('/', async (req, res) => {
-    //if(req.role === 'admin'){
+router.post('/', validateJwt, getRole, async (req, res) => {
+
+    if(req.role === 'admin'){
         if(validateAgainstSchema(req.body, CourseSchema)){
             try {
                 const id = await insertNewCourse(req.body);
@@ -59,9 +59,9 @@ router.post('/', async (req, res) => {
                 error: "Request body is not a valid course object."
             });
         }
-   // } else {
-  //      next();
-  //  }
+    } else {
+        next();
+    }
 });
 
 //no need for auth
@@ -81,11 +81,11 @@ router.get('/:id', async (req, res, next) => {
     }
 });
 
-//router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
-router.patch('/:id', async (req, res, next) => {
-    //if(course.instructorId === user.Id || user.role === 'admin'){
-        try {
-            const id = parseInt(req.params.id);
+router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const course = await getCourseById(id);
+        if(course.instructorId === req.user || req.role === 'admin'){
             const updateSuccess = await updateCourseById(id, req.body);
             if(updateSuccess){
                 res.status(200).send();
@@ -94,20 +94,21 @@ router.patch('/:id', async (req, res, next) => {
                     error: "Unable to update course."
                 });
             }
-        } catch (error) {
-            console.error(error);
+        } else {
             res.status(500).send({
-                    error: "Unable to update course. Try again later."
+                error: "Unauthorized." 
             });
         }
-   // } else {
-      // next();
-   //}
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+                error: "Unable to update course. Try again later."
+        });
+    }
 });
 
-//router.delete('/:id', validateJwt, getRole, async (req, res, next) => {
-router.delete('/:id', async (req, res, next) => {
-    //if(user.role === 'admin'){
+router.delete('/:id', validateJwt, getRole, async (req, res, next) => {
+    if(req.role === 'admin'){
         try {
             const deleteSuccess = await deleteCourseById(parseInt(req.params.id));
             if(deleteSuccess){
@@ -121,11 +122,59 @@ router.delete('/:id', async (req, res, next) => {
                 error: "Unable to delete course. Please try later."
             });
         }
-    //} else {
-    //    res.status(403).send({
-    //        error: "Unauthorized"
-    //    });
-    //}
+    } else {
+        res.status(403).send({
+            error: "Unauthorized"
+        });
+    }
+});
+
+router.get('/:id/students', validateJwt, getRole, async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const course = await getCourseById(id);
+        if(course.instructorId === req.user || req.role === 'admin'){
+            const results = await getStudentsByCourseId(id);
+            var students = [];
+            results.forEach(RowDataPacket => {
+                students.push(RowDataPacket.userId);
+            });
+            res.status(200).send({
+                students: students
+            });
+        } else{
+            res.status(403).send({
+                error: "Unauthorized"
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        next();
+    }
+});
+
+router.get('/:id/assignments', validateJwt, getRole, async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id);
+        const course = await getCourseById(id);
+        if(course.instructorId === req.user || req.role === 'admin'){
+            const results = await getAssignmentsByCourseId(id);
+            var assignments = [];
+            results.forEach(RowDataPacket => {
+                assignments.push(RowDataPacket.id);
+            });
+            res.status(200).send({
+                assignments: assignments
+            });
+        } else{
+            res.status(403).send({
+                error: "Unauthorized"
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        next();
+    }
 });
 
 module.exports = router;
