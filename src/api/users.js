@@ -7,16 +7,39 @@ const { validateAuth,
         authenticate,
         generateJwt,
         validateJwt,
-        getRole } = require('../lib/auth');
+        getRole,
+        validateJwtManual,
+        getRoleManual } = require('../lib/auth');
 
-router.post('/', validateJwt, getRole, async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const user = req.body;
         if(validateUser(user)) {
-            if((user.role === 'admin' || user.role === 'instructor') && req.role !== 'admin') {
-                res.status(403).send({
-                    error: "Unauthorized to create new admin or instructor."
-                });
+            if(user.role === 'admin' || user.role === 'instructor') {              
+                const [jwtStatus, requestId] = validateJwtManual(req);
+                if(jwtStatus) {
+                    try {
+                        const role = await getRoleManual(requestId);
+                        if(role === 'admin') {
+                            const id = await insertUser(user);
+                            res.status(201).send({
+                                id: id
+                            });
+                        } else {
+                            res.status(403).send({
+                                error: "Unauthorized to create new admin or instructor."
+                            });
+                        }
+                    } catch (err) {
+                        res.status(500).send({
+                            error: "Error authenticating. Please try again later."
+                        });
+                    }
+                } else {
+                    res.status(403).send({
+                        error: "Invalid authentication token provided."
+                    });
+                }
             } else {
                 const id = await insertUser(user);
                 res.status(201).send({
@@ -31,7 +54,7 @@ router.post('/', validateJwt, getRole, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send({
-            error: "Error creating new user.  Please try again later."
+            error: "Error creating new user. Please try again later."
         });
     }
 });
