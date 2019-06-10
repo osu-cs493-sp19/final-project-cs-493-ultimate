@@ -10,11 +10,11 @@ const { extractValidFields } = require('../lib/validate');
  * Schema describing required/optional fields of a assignment object.
  */
 const assignmentSchema = {
-  courseId: { required: false/*, type: 'string'*/ },
-  title: { required: true/*, type: 'string'*/ },
-  description: { required: false/*, type: 'string'*/ },
-  points: {required: true/*, type: 'string'*/ },
-  due: {required: true/*, type: 'string'*/ }
+  courseId: { required: false, type: 'number' }, //float checking made
+  title: { required: true, type: 'string' },
+  description: { required: false, type: 'string' },
+  points: {required: true, type: 'number' }, //same here as well
+  due: {required: false, type: 'string' }
 };
 exports.assignmentSchema = assignmentSchema;
 
@@ -22,10 +22,9 @@ exports.assignmentSchema = assignmentSchema;
  * Schema describing required/optional fields of a submission object. Submission object has its own id for URL download reasons
  */
 const submissionSchema = {
-  studentId: { required: true/*, type: 'string'*/ }, //!!!!!!!!!!!!!REMOVE LATER ONCE AUTH WORKS!!!!!!!!!!!!!
-  description: { required: false/*, type: 'string'*/ },
-  timestamp: { required: true/*, type: 'string'*/ },
-  file: { required: true } //change!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  description: { required: false, type: 'string' },
+  timestamp: { required: true, type: 'string' },
+  file: { required: true, type: 'string' } 
 };
 exports.submissionSchema = submissionSchema;
 
@@ -47,6 +46,7 @@ function getAssignmentsCount() {
     );
   });
 }
+exports.getAssignmentsCount = getAssignmentsCount;
 
 /*
  * Executes a MySQL query to return a single page of assignments.  Returns a
@@ -105,6 +105,7 @@ function getSubmissionsCount(id) {
     );
   });
 }
+exports.getSubmissionsCount = getSubmissionsCount;
 
 /*
  * Executes a MySQL query to return a single page of assignments.  Returns a
@@ -152,6 +153,8 @@ exports.getSubmissionsPage = getSubmissionsPage;
 function insertNewAssignment(assignment) {
   return new Promise((resolve, reject) => {
     assignment = extractValidFields(assignment, assignmentSchema);
+    assignment.courseId = parseInt(assignment.courseId); //safety check
+    assignment.points = parseInt(assignment.points); //safety check
     assignment.id = null;
     dbPool.query(
       'INSERT INTO assignments SET ?',
@@ -173,11 +176,12 @@ exports.insertNewAssignment = insertNewAssignment;
  * Executes a MySQL query to insert a new submission into the database.  Returns
  * a Promise that resolves to the ID of the newly-created assignment entry.
  */
-function insertNewSubmission(submission,id) {
+function insertNewSubmission(submission,id,sId) {
   return new Promise((resolve, reject) => {
     submission = extractValidFields(submission, submissionSchema);
     submission.id = null;
     submission.assignmentId = id;
+    submission.studentId = sId;
     dbPool.query(
       'INSERT INTO submissions SET ?',  
       submission,
@@ -247,7 +251,7 @@ exports.replaceAssignmentById = replaceAssignmentById;
 function deleteAssignmentById(id) {
   return new Promise((resolve, reject) => {
     dbPool.query(
-      'DELETE FROM assignments WHERE id = ?',
+      'DELETE FROM assignments WHERE id = ?', //delete this assignment
       [ id ],
       (err, result) => {
         if (err) {
@@ -258,7 +262,7 @@ function deleteAssignmentById(id) {
       }
     );
     dbPool.query(
-      'DELETE FROM submissions WHERE assignmentId = ?',
+      'DELETE FROM submissions WHERE assignmentId = ?', //delete this assignment's submissions
       [ id ],
       (err, result) => {
         if (err) {

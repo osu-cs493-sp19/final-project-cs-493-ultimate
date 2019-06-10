@@ -12,6 +12,9 @@ CREATE TABLE users (
     UNIQUE KEY (`email`)
 );
 
+INSERT INTO users VALUES 
+    (0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin');
+
 CREATE TABLE assignments (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
     `courseId`        mediumint(9)                            NOT NULL,

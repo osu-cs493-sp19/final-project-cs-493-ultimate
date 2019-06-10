@@ -1,50 +1,49 @@
 /* To Do:
- * Change User Tokens
- * Re-enable data verification
- * Logged in student's submission needs to work without parameter 
- * Existence checking for each command !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * -Add file URL access
+ * -Add Download Support
  * 
  * Required SQL Containers:
  * --Assignments
  * --Submissions
  * 
  * POST Bodies:
- * --Assignment
+ * --Assignment (requires user to be logged in as instructor at minimum)
 {
-  "courseId": "5",
+  "courseId": 5,
   "title": "HW2",
   "description": "Complete this equation.",
-  "points": "200",
-  "due": "uhh"
+  "points": 200,
+  "due": "Today buddy"
 }
- * --Submission:
+ * --Submission (requires user to be logged in as student at minimum): 
 {
-  "studentId": "3",
   "description": "I did it.",
   "timestamp": "3000-2",
   "file": "something.jpg"
 }
  * 
  * Checklist:
- * Post Assignment[x] --> Need to add admin or instructor authentication , fix user authentication
- * Get Assignment[x]
- * Patch Assignment[x] --> Need to add admin or instructor authentication
- * Delete Assignment[x] --> Need to add admin or instructor authentication
- * Get Submission [x] --> Anyone can view, no authentication required
- * Post Submission [x] --> Anyone who is logged in can post, fix user authentication
- * */
+ * Get Assignments[x] --> Anyone can view all assignments, paginated
+ * Get Assignment[x] --> Anyone can view a single assignment
+ * Post Assignment[x] --> Need to be admin or instructor
+ * Patch Assignment[x] --> Need to be admin or instructor
+ * Delete Assignment[x] --> Need to be admin or instructor
+ * Get Submission [x] --> Anyone can view all submissions, paginated
+ * Post Submission [x] --> Need to be admin, instructor, or student
+ */
 /*
  * API sub-router for assignments/submissions collection endpoints.
  */
 
 const router = require('express').Router();
-var jwt = require('jsonwebtoken');
 
 const { validateAgainstSchema } = require('../lib/validate');
 const {
   assignmentSchema,
   submissionSchema,
+  getAssignmentsCount,
   getAssignmentsPage,
+  getSubmissionsCount,
   getSubmissionsPage,
   insertNewAssignment,
   insertNewSubmission,
@@ -53,9 +52,7 @@ const {
   deleteAssignmentById
 } = require('../model/assignment');
 
-const { validateAuth,
-  authenticate,
-  generateJwt,
+const {
   validateJwt,
   getRole } = require('../lib/auth');
 
@@ -64,6 +61,7 @@ const { validateAuth,
  */
 router.get('/', async (req, res, next) => {
   try {
+    if ((await getAssignmentsCount()) != 0){ //make sure the number of assignments is greater than 0
     const assignmentPage = await getAssignmentsPage(parseInt(req.query.page) || 1);
     assignmentPage.links = {};
     if (assignmentPage.page < assignmentPage.totalPages) {
@@ -75,6 +73,11 @@ router.get('/', async (req, res, next) => {
       assignmentPage.links.firstPage = `/assignments?page=1`;
     }
     res.status(200).send(assignmentPage);
+  } else {
+    res.status(404).send({
+      error: "No assignments found."
+    });
+  }
   } catch (err) {
     console.error(err);
     res.status(500).send({
@@ -88,12 +91,15 @@ router.get('/', async (req, res, next) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const assignment = await getAssignmentById(parseInt(req.params.id));
-    if (assignment) {
-      res.status(200).send(assignment);
-    } else {
+      const assignment = await getAssignmentById(parseInt(req.params.id));
+      if (assignment) {
+        res.status(200).send(assignment);
+      } else {
+        res.status(404).send({
+        error: `No assignment of id: ${req.params.id} found.`
+      });
       next();
-    }
+      }
   } catch (err) {
     console.error(err);
     res.status(500).send({
@@ -106,19 +112,31 @@ router.get('/:id', async (req, res) => {
 /*
  * Route to fetch submissions of a particular assignment.
  */
-router.get('/:id/submissions', async (req, res, next) => { //!!!!!!!!!!!!!!!!!!!add error check for id existence
+router.get('/:id/submissions', async (req, res, next) => {
   try {
-    const submissionPage = await getSubmissionsPage(parseInt(req.query.page) || 1, req.params.id);
-    submissionPage.links = {};
-    if (submissionPage.page < submissionPage.totalPages) {
-      submissionPage.links.nextPage = `'/${req.params.id}/submissions?page=${submissionPage.page + 1}`;
-      submissionPage.links.lastPage = `'/${req.params.id}/submissions?page=${submissionPage.totalPages}`;
+    if(await getAssignmentById(parseInt(req.params.id))){
+      if ((await getSubmissionsCount(req.params.id)) != 0){ //make sure the number of submissions is greater than 0
+        const submissionPage = await getSubmissionsPage(parseInt(req.query.page) || 1, req.params.id);
+        submissionPage.links = {};
+        if (submissionPage.page < submissionPage.totalPages) {
+          submissionPage.links.nextPage = `'/${req.params.id}/submissions?page=${submissionPage.page + 1}`;
+          submissionPage.links.lastPage = `'/${req.params.id}/submissions?page=${submissionPage.totalPages}`;
+        }
+        if (submissionPage.page > 1) {
+          submissionPage.links.prevPage = `/${req.params.id}/submissions?page=${submissionPage.page - 1}`;
+          submissionPage.links.firstPage = `/${req.params.id}/submissions?page=1`;
+        }
+        res.status(200).send(submissionPage);
+      } else {
+        res.status(404).send({
+        error: `No submissions for assignment of id: ${req.params.id} found.`
+        });
+      }
+    } else {
+      res.status(404).send({
+        error: `No assignment of id: ${req.params.id} found.`
+      });
     }
-    if (submissionPage.page > 1) {
-      submissionPage.links.prevPage = `/${req.params.id}/submissions?page=${submissionPage.page - 1}`;
-      submissionPage.links.firstPage = `/${req.params.id}/submissions?page=1`;
-    }
-    res.status(200).send(submissionPage);
   } catch (err) {
     console.error(err);
     res.status(500).send({
@@ -129,51 +147,26 @@ router.get('/:id/submissions', async (req, res, next) => { //!!!!!!!!!!!!!!!!!!!
 
 
 /*
-* User Authentication for following functions
-*//*
-const privatekey = 'mykey';
-function authUser(req, res, next) {
-  if (req.token !== null) { // Existing token
-      let payload = loggedIn(req.token);
-
-      if (payload !== null) { // && payload.exp > new Date().getTime()) {
-          req.tokenPayload = payload;
-          next();
-      } else {
-          res.status(401).send("You are not logged in!");
-      }
-  } else {
-      res.status(403).send("No token provided");
-  }
-}
-function loggedIn(token) {
-  let payload = null;
-  try {
-      payload = jwt.verify(token, privatekey);
-  } catch (err) {
-      return null;
-  }
-  return payload;
-}
-router.use(authUser);*/
+* %%%%%%%% User Authentication required for functions past this point. %%%%%%%%
+*/
 
 /*
- * Route to create a new assignment.
+ * Route to create a new assignment. User must be admin or instructor.
  */
-router.post('/', async (req, res) => {
+router.post('/', validateJwt, getRole, async (req, res) => {
   if (validateAgainstSchema(req.body, assignmentSchema)) {
-    try {
-      //if (req.tokenPayload.id == req.body.role){ //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CHANGE
+    try { 
+      if ( req.role === "admin" || req.role === "instructor" ){ 
       const id = await insertNewAssignment(req.body);
       res.status(201).send({
         id: id,
-        courseId: req.body.courseId,
+        courseId: parseInt(req.body.courseId),
         links: {
           assignment: `/assignments/${id}`,
           submission: `/assignments/${id}/submissions`
         }
       });
-    } //else res.status(401).json({ error: "You are not authorized to add this resource." });} 
+    } else res.status(401).json({ error: "You are not authorized to add this resource."});} 
      catch (err) {
       console.error(err);
       res.status(500).send({
@@ -188,12 +181,12 @@ router.post('/', async (req, res) => {
 });
 
 /*
- * Route to replace data for a assignment.
+ * Route to replace data for a assignment. User must be admin or instructor.
  */
-router.patch('/:id', async (req, res, next) => {
+router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
   if (validateAgainstSchema(req.body, assignmentSchema)) {
     try {
-      //if (req.tokenPayload.id ==  (await getAssignmentById(req.params.id)).studentId || req.tokenPayload.role == 2){ //need to change later
+      if ( req.role === "admin" || req.role === "instructor" ){ 
       const id = parseInt(req.params.id)
       const updateSuccessful = await replaceAssignmentById(req.params.id, req.body);
       if (updateSuccessful) {
@@ -206,7 +199,7 @@ router.patch('/:id', async (req, res, next) => {
       } else {
         next();
       }
-    } //else {res.status(401).json({ error: "You are not authorized to change this resource." });}} 
+    } else {res.status(401).json({ error: "You are not authorized to change this resource." });}} 
     catch (err) {
       console.error(err);
       res.status(500).send({
@@ -223,19 +216,19 @@ router.patch('/:id', async (req, res, next) => {
 });
 
 /*
- * Route to delete a assignment.
+ * Route to delete a assignment. User must be admin or instructor.
  */
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', validateJwt, getRole, async (req, res, next) => {
   try {
-    //if (req.tokenPayload.id ==  (await getAssignmentById(req.params.id)).studentId || req.tokenPayload.role == 1){ //need to change later
+    if ( req.role === "admin" || req.role === "instructor" ){ 
     const deleteSuccessful = await deleteAssignmentById(parseInt(req.params.id));
     if (deleteSuccessful) {
       console.log("deleted");
-      res.status(200).send(`Deleted ${req.params.id}.`);
+      res.status(200).send(`Deleted assignments/${req.params.id}. Submissions to this assignment are also deleted.`);
     } else {
       next();
     }
-  } //else {res.status(401).json({ error: "You are not authorized to delete this resource." });}} 
+  } else {res.status(401).json({ error: "You are not authorized to delete this resource." });}} 
   catch (err) {
     console.error(err);
     res.status(500).send({
@@ -245,22 +238,30 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 /*
- * Route to create a new submission.
+ * Route to create a new submission. User must be admin, instructor, or student.
  */
-router.post('/:id/submissions', async (req, res) => {
+router.post('/:id/submissions', validateJwt, getRole, async (req, res) => { 
   if (validateAgainstSchema(req.body, submissionSchema)) {
     try {
-      //if (req.tokenPayload.id == req.body.role){ //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CHANGE
-      const id = await insertNewSubmission(req.body, req.params.id);
-      res.status(201).send({
-        id: id,
-        assignmentId: req.body.assignmentId, //FIXXXXXXXXXXXXXXXXXXXXXx
-        studentId: req.body.studentId,//req.tokenPayload.id, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CHANGE
-        links: {
-          submissions: `/assignments/${id}/submissions`
-        }
-      });
-    } //else res.status(401).json({ error: "You are not authorized to add this resource." });} 
+      if ( req.role === "admin" || req.role === "instructor" || req.role === "student" ){ 
+      if(await getAssignmentById(parseInt(req.params.id))){
+        const id = await insertNewSubmission(req.body, req.params.id, req.user);
+        res.status(201).send({
+          id: id,
+          assignmentId: req.params.id,
+          studentId: req.user, 
+          links: {
+            submissions: `/assignments/${req.params.id}/submissions`
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Need a URL for file access!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          }
+        });
+      }
+      else {
+        res.status(404).send({
+          error: `No assignment of id: ${req.params.id} found.`
+        });
+      }
+    } else res.status(401).json({ error: "You are not authorized to add this resource." });} 
      catch (err) {
       console.error(err);
       res.status(500).send({
