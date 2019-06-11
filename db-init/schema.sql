@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 INSERT INTO users VALUES 
-    (0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin');
+    (0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin'),
+    (1, 'Professor Hess', 'hessro@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor'),
+    (2, 'Jane Student'. 'doej@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student');
 
 CREATE TABLE IF NOT EXISTS assignments (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,

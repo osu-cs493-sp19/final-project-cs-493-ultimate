@@ -53,8 +53,8 @@ exports.insertUser = function(user) {
 }
 
 exports.getUserById = function(id) {
-    return new Promise(async (resolve, reject) => {
-        mysqlPool.query(
+    return new Promise((resolve, reject) => {
+        dbPool.query(
             `SELECT * FROM users WHERE id = ?`,
             parseInt(id),
             (err, result) => {
@@ -64,13 +64,35 @@ exports.getUserById = function(id) {
                     if(result.length == 0) {
                         resolve(null);
                     } else {
-                        const filterSchema = {
-                            name: { required: true },
-                            email: { required: true },
-                            admin: {required: false}
-                        };
-                        const user = extractValidFields(result[0], filterSchema);
-                        resolve(user);
+                        delete result[0]['password'];
+                        resolve(result[0]);
+                    } 
+                }
+            }  
+        );
+    }); 
+}
+
+exports.getUserCourses = function(id, role) {
+    let query;
+    if(role === 'instructor') {
+        query = 'SELECT id FROM courses WHERE instructorId = ?';
+    } else {
+        query = 'SELECT courseId AS id FROM enrollment WHERE userId = ?';
+    }
+
+    return new Promise((resolve, reject) => {
+        dbPool.query(
+            query,
+            parseInt(id),
+            (err, result) => {
+                if(err) {
+                    reject(err);
+                } else {
+                    if(result.length == 0) {
+                        resolve(null);
+                    } else {
+                        resolve(result);
                     } 
                 }
             }  
