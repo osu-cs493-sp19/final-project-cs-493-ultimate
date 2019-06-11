@@ -1,7 +1,9 @@
 const router = require('express').Router();
 const {
     insertUser,
-    validateUser } = require('../model/user');
+    validateUser,
+    getUserById,
+    getUserCourses } = require('../model/user');
 
 const { validateAuth,
         authenticate,
@@ -31,6 +33,7 @@ router.post('/', async (req, res) => {
                             });
                         }
                     } catch (err) {
+                        console.error(err);
                         res.status(500).send({
                             error: "Error authenticating. Please try again later."
                         });
@@ -86,10 +89,18 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/:id', validateJwt, getRole, (req, res, next) => {
+router.get('/:id', validateJwt, getRole, async (req, res, next) => {
     try {
         if(req.user === parseInt(req.params.id)) {
-            res.send('TODO');
+            const user = await getUserById(req.user);
+            if(user) {
+                if(req.role === 'student' || req.role === 'instructor') {
+                    user.courses = await getUserCourses(req.user, req.role);
+                }
+                res.status(200).send(user);
+            } else {
+                next();
+            }
         } else {
             res.status(403).send({
                 error: "Unauthorized to access this resource."

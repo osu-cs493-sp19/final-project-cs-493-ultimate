@@ -90,7 +90,7 @@ exports.getRole = function(req, res, next) {
                     error: "Error authenticating. Try again later."
                 });
             } else {
-                req.role = result[0].role;
+                req.role = result[0] ? result[0].role : null;
                 next();
             }
         }    
