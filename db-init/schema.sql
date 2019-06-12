@@ -13,22 +13,23 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY (id),
     UNIQUE KEY (`email`)
 );
+ALTER TABLE users AUTO_INCREMENT=0;
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`) VALUES
-	(0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin'),
-	(1, 'Professor Hess', 'hessro@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor'),
-	(2, 'Number 2', '2num@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(3, 'Jane Student', 'doej@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(4, 'Student 2', '2@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(5, 'Student 3', '3@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(6, 'Student 4', '4@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(7, 'Student 5', '5@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(8, 'Student 6', '6@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(9, 'Student 7', '7@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(10, 'Student 8', '8@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(11, 'Student 9', '9@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(12, 'Student 10', '10@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
-	(13, 'Other Prof', 'prof@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor');
+	(1, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin'),
+	(2, 'Professor Hess', 'hessro@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor'),
+	(3, 'Number 2', '2num@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(4, 'Jane Student', 'doej@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(5, 'Student 2', '2@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(6, 'Student 3', '3@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(7, 'Student 4', '4@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(8, 'Student 5', '5@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(9, 'Student 6', '6@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(10, 'Student 7', '7@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(11, 'Student 8', '8@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(12, 'Student 9', '9@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(13, 'Student 10', '10@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(14, 'Other Prof', 'prof@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor');
 
 CREATE TABLE IF NOT EXISTS assignments (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
@@ -110,16 +111,16 @@ INSERT INTO `submissions` VALUES
   (25,1,7,'Shrek.', "2019-06-14T17:00:00-09:00", "example.pdf");
 
 INSERT INTO `courses` (`id`, `subject`, `number`, `title`, `term`, `instructorId`) VALUES
-	(1, 'GEN', 101, 'General Studies', 'SP19', 1),
-	(2, 'PAC', 179, 'Fly Fishing II', 'SP19', 1),
-	(3, 'CS', 493, 'Cloud App Dev', 'SP19', 1),
-	(4, 'CS', 463, 'Capstone', 'SP19', 13),
-	(5, 'CS', 444, 'OS2', 'F19', 13),
-	(6, 'CS', 419, 'Cool Stuff', 'F19', 13),
-	(7, 'CS', 419, 'Cooler Stuff', 'F19', 13),
-	(9, 'PAC', 160, 'Bowling I', 'F19', 13),
-	(10, 'PAC', 101, 'How to Walk', 'F19', 13),
-	(11, 'PAC', 102, 'How to Run', 'W20', 13);
+	(1, 'GEN', 101, 'General Studies', 'SP19', 2),
+	(2, 'PAC', 179, 'Fly Fishing II', 'SP19', 2),
+	(3, 'CS', 493, 'Cloud App Dev', 'SP19', 2),
+	(4, 'CS', 463, 'Capstone', 'SP19', 14),
+	(5, 'CS', 444, 'OS2', 'F19', 14),
+	(6, 'CS', 419, 'Cool Stuff', 'F19', 14),
+	(7, 'CS', 419, 'Cooler Stuff', 'F19', 14),
+	(9, 'PAC', 160, 'Bowling I', 'F19', 14),
+	(10, 'PAC', 101, 'How to Walk', 'F19', 14),
+	(11, 'PAC', 102, 'How to Run', 'W20', 14);
 
 INSERT INTO `enrollment` (`courseId`, `userId`) VALUES
 	(1, 2),
