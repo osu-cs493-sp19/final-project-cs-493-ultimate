@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS submissions (
     `studentId`        mediumint(9)                            NOT NULL,
     `description`      VARCHAR(255)                            NOT NULL,
     `timestamp`     VARCHAR(255)                            NOT NULL,
+    `filename`  VARCHAR(255),
+    `mimeType` VARCHAR(255),
     `fileData`      LONGBLOB,
     PRIMARY KEY (id)
 );
@@ -82,7 +84,7 @@ INSERT INTO `assignments` VALUES
   (3,1,'Homework 3','Do science.', 100,"2020-14-14T17:00:00-07:00"),
   (4,2,'HW1','Go fishing.', 150,"2019-06-14T17:00:00-09:00");
 
-INSERT INTO `submissions` VALUES
+INSERT INTO `submissions`(id,assignmentId,studentId,description,timestamp,filename) VALUES
   (1,1,3,'Math baked.', "2019-06-14T17:00:00-09:00", "example.pdf"),
   (2,1,3,'No more math.', "2019-06-15T17:00:00-09:00", "example2.pdf"),
   (3,1,4,'EZ.', "2019-06-14T17:00:00-09:00", "example22.pdf"),
