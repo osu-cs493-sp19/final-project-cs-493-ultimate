@@ -83,7 +83,7 @@ router.get('/:id', async (req, res, next) => {
 
 router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
     try {
-        if(validateAgainstSchema(req.body, patchCourseSchema)){
+        if(req.body.subject || req.body.number || req.body.title || req.body.term || req.body.instructorId){
             const id = parseInt(req.params.id);
             const course = await getCourseById(id);
             if(course.instructorId === req.user || req.role === 'admin'){
@@ -96,7 +96,7 @@ router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
             }
         } else{
             res.status(400).send({
-                error: "Please"
+                error: "Missing at least one applicable Course value."
             })
         }
     } catch (error) {
@@ -168,6 +168,11 @@ router.post('/:id/students', validateJwt, getRole, async (req, res, next) => {
                 }
                 if(removes.length > 0){
                     const rmvResults = await removeStudentsInCourse(id, removes);
+                    if(!rmvResults){
+                        res.status(500).send({
+                            error: "Unable to remove."
+                        })
+                    }
                 }
                 res.status(200).send();
             } else{
@@ -202,19 +207,24 @@ router.get('/:id/roster', validateJwt, getRole, async (req, res, next) => {
 
         const id = parseInt(req.params.id);
         const course = await getCourseById(id);
-        if(course.instructorId === req.user || req.role === 'admin'){
-            const results = await getCourseRoster(id);
-            const json2csvParser = new Parser({fields});
-            const csv = json2csvParser.parse(results);
-
-            res.setHeader('Content-disposition', `attachment; course${id}roster`);
-            res.set('Content-Type', 'text/csv');
-            res.status(200).send(csv);
-        } else{
-            res.status(403).send({
-                error: "Unauthorized"
-            });
+        if(course){
+            if(course.instructorId === req.user || req.role === 'admin'){
+                const results = await getCourseRoster(id);
+                const json2csvParser = new Parser({fields});
+                const csv = json2csvParser.parse(results);
+    
+                res.setHeader('Content-disposition', `attachment; course${id}roster`);
+                res.set('Content-Type', 'text/csv');
+                res.status(200).send(csv);
+            } else{
+                res.status(403).send({
+                    error: "Unauthorized"
+                });
+            }
+        } else {
+            next();
         }
+
     } catch (error) {
         console.error(error);
         next();
@@ -226,14 +236,20 @@ router.get('/:id/roster', validateJwt, getRole, async (req, res, next) => {
 router.get('/:id/assignments', async (req, res, next) => {
     try {
         const id = parseInt(req.params.id);
-        const results = await getAssignmentsByCourseId(id);
-        var assignments = [];
-        results.forEach(RowDataPacket => {
-            assignments.push(RowDataPacket.id);
-        });
-        res.status(200).send({
-            assignments: assignments
-        });
+        const course = await getCourseById(id);
+        if(course){
+            const results = await getAssignmentsByCourseId(id);
+            var assignments = [];
+            results.forEach(RowDataPacket => {
+                assignments.push(RowDataPacket.id);
+            });
+            res.status(200).send({
+                assignments: assignments
+            });
+        } else{
+            next();
+        }
+
     } catch (error) {
         console.error(error);
         next();

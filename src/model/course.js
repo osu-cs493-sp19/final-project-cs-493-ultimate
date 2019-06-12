@@ -15,15 +15,6 @@ const CourseSchema = {
 }
 exports.CourseSchema = CourseSchema;
 
-const patchCourseSchema = {
-    subject: { type: 'string', required: false },
-    number: { type: 'number', required: false },
-    title: { type: 'string', required: false },
-    term: { type: 'string', required: false },
-    instructorId: { type: 'number', required: false}
-}
-exports.patchCourseSchema = patchCourseSchema;
-
 const RosterSchema = {
     add: { type: 'object', required: true},
     remove: { type: 'object', required: true}
@@ -187,8 +178,8 @@ function insertStudentsInCourse(courseId, userIds){
             rows.push([courseId, id]);
         });
         db.query(
-            'INSERT INTO enrollment (courseId, userId) VALUES ?; DELETE FROM enrollment WHERE courseId = ? AND userId = ?',
-            [addRows, removeRows],
+            'INSERT INTO enrollment (courseId, userId) VALUES ?',
+            [rows],
             (err, result) => {
                 if(err){
                     reject(err);
@@ -204,9 +195,16 @@ exports.insertStudentsInCourse = insertStudentsInCourse;
 
 function removeStudentsInCourse(courseId, userIds){
     return new Promise((resolve, reject) =>{
-        db.query(
-            'DELETE FROM enrollment WHERE courseId = ? AND userId = ?',
-            [courseId, [userIds]],
+        const sql1 = 'DELETE FROM enrollment WHERE courseId = ';
+        const sql2 = ' AND userId = ';
+        const rows = [];
+        userIds.forEach(id => {
+            var str = sql1+courseId;
+            str +=sql2+id;
+            rows.push(str)
+        })
+        const q = rows.join(';');
+        db.query( q,
             (err, result) => {
                 if(err){
                     reject(err);
