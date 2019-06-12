@@ -184,7 +184,7 @@ router.post('/', validateJwt, getRole, async (req, res) => {
  * Route to replace data for a assignment. User must be admin or instructor.
  */
 router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
-  if (validateAgainstSchema(req.body, assignmentSchema)) {
+  if (req.body.due || req.body.description || req.body.courseId || req.body.points || req.body.title) {
     try {
       if ( req.role === "admin" || req.role === "instructor" ){ 
       const id = parseInt(req.params.id)

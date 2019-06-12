@@ -72,7 +72,12 @@ router.post('/', validateJwt, getRole, async (req, res) => {
 router.get('/:id', async (req, res, next) => {
     try {
         const course = await getCourseById(parseInt(req.params.id));
-        res.status(200).send(course);
+        if(course){
+            res.status(200).send(course);
+        } else{
+            next();
+        }
+
 
     } catch (error) {
         console.error(error);
@@ -168,11 +173,6 @@ router.post('/:id/students', validateJwt, getRole, async (req, res, next) => {
                 }
                 if(removes.length > 0){
                     const rmvResults = await removeStudentsInCourse(id, removes);
-                    if(!rmvResults){
-                        res.status(500).send({
-                            error: "Unable to remove."
-                        })
-                    }
                 }
                 res.status(200).send();
             } else{
