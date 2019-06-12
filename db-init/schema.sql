@@ -46,10 +46,9 @@ CREATE TABLE IF NOT EXISTS submissions (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
     `assignmentId`        mediumint(9)                            NOT NULL,
     `studentId`        mediumint(9)                            NOT NULL,
-    `description`      VARCHAR(255)                            NOT NULL,   
+    `description`      VARCHAR(255)                            NOT NULL,
     `timestamp`     VARCHAR(255)                            NOT NULL,
-    `file`      VARCHAR(255)  NOT NULL,
-
+    `fileData`      LONGBLOB,
     PRIMARY KEY (id)
 );
 
