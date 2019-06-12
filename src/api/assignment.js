@@ -1,11 +1,11 @@
 /* To Do:
  * -Add file URL access
  * -Add Download Support
- * 
+ *
  * Required SQL Containers:
  * --Assignments
  * --Submissions
- * 
+ *
  * POST Bodies:
  * --Assignment (requires user to be logged in as instructor at minimum)
 {
@@ -15,13 +15,13 @@
   "points": 200,
   "due": "Today buddy"
 }
- * --Submission (requires user to be logged in as student at minimum): 
+ * --Submission (requires user to be logged in as student at minimum):
 {
   "description": "I did it.",
   "timestamp": "3000-2",
   "file": "something.jpg"
 }
- * 
+ *
  * Checklist:
  * Get Assignments[x] --> Anyone can view all assignments, paginated
  * Get Assignment[x] --> Anyone can view a single assignment
@@ -47,6 +47,7 @@ const {
   getSubmissionsPage,
   insertNewAssignment,
   insertNewSubmission,
+  getSubmissionbyID,
   getAssignmentById,
   replaceAssignmentById,
   deleteAssignmentById
@@ -55,6 +56,11 @@ const {
 const {
   validateJwt,
   getRole } = require('../lib/auth');
+
+const {
+  upload,
+  removeUploadedFile
+} = require('../lib/files')
 
 /*
  * Route to fetch assignments.
@@ -155,8 +161,8 @@ router.get('/:id/submissions', async (req, res, next) => {
  */
 router.post('/', validateJwt, getRole, async (req, res) => {
   if (validateAgainstSchema(req.body, assignmentSchema)) {
-    try { 
-      if ( req.role === "admin" || req.role === "instructor" ){ 
+    try {
+      if ( req.role === "admin" || req.role === "instructor" ){
       const id = await insertNewAssignment(req.body);
       res.status(201).send({
         id: id,
@@ -166,7 +172,7 @@ router.post('/', validateJwt, getRole, async (req, res) => {
           submission: `/assignments/${id}/submissions`
         }
       });
-    } else res.status(401).json({ error: "You are not authorized to add this resource."});} 
+    } else res.status(401).json({ error: "You are not authorized to add this resource."});}
      catch (err) {
       console.error(err);
       res.status(500).send({
@@ -186,7 +192,7 @@ router.post('/', validateJwt, getRole, async (req, res) => {
 router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
   if (req.body.due || req.body.description || req.body.courseId || req.body.points || req.body.title) {
     try {
-      if ( req.role === "admin" || req.role === "instructor" ){ 
+      if ( req.role === "admin" || req.role === "instructor" ){
       const id = parseInt(req.params.id)
       const updateSuccessful = await replaceAssignmentById(req.params.id, req.body);
       if (updateSuccessful) {
@@ -199,14 +205,14 @@ router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
       } else {
         next();
       }
-    } else {res.status(401).json({ error: "You are not authorized to change this resource." });}} 
+    } else {res.status(401).json({ error: "You are not authorized to change this resource." });}}
     catch (err) {
       console.error(err);
       res.status(500).send({
         error: "Unable to update specified assignment.  Please try again later."
       });
     }
-  
+
   }
    else {
     res.status(400).send({
@@ -220,7 +226,7 @@ router.patch('/:id', validateJwt, getRole, async (req, res, next) => {
  */
 router.delete('/:id', validateJwt, getRole, async (req, res, next) => {
   try {
-    if ( req.role === "admin" || req.role === "instructor" ){ 
+    if ( req.role === "admin" || req.role === "instructor" ){
     const deleteSuccessful = await deleteAssignmentById(parseInt(req.params.id));
     if (deleteSuccessful) {
       console.log("deleted");
@@ -228,7 +234,7 @@ router.delete('/:id', validateJwt, getRole, async (req, res, next) => {
     } else {
       next();
     }
-  } else {res.status(401).json({ error: "You are not authorized to delete this resource." });}} 
+  } else {res.status(401).json({ error: "You are not authorized to delete this resource." });}}
   catch (err) {
     console.error(err);
     res.status(500).send({
@@ -240,19 +246,21 @@ router.delete('/:id', validateJwt, getRole, async (req, res, next) => {
 /*
  * Route to create a new submission. User must be admin, instructor, or student.
  */
-router.post('/:id/submissions', validateJwt, getRole, async (req, res) => { 
-  if (validateAgainstSchema(req.body, submissionSchema)) {
+router.post('/:id/submissions', validateJwt, getRole, upload.single('file'), async (req, res) => {
+  if (req.file && validateAgainstSchema(req.body, submissionSchema)) {
     try {
-      if ( req.role === "admin" || req.role === "instructor" || req.role === "student" ){ 
+      if ( req.role === "admin" || req.role === "instructor" || req.role === "student" ){
       if(await getAssignmentById(parseInt(req.params.id))){
-        const id = await insertNewSubmission(req.body, req.params.id, req.user);
+        console.log(req.file);
+        const id = await insertNewSubmission(req.file, req.body, req.params.id, req.user);
+        removeUploadedFile(req.file);
         res.status(201).send({
           id: id,
           assignmentId: req.params.id,
-          studentId: req.user, 
+          studentId: req.user,
           links: {
-            submissions: `/assignments/${req.params.id}/submissions`
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Need a URL for file access!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            submissions: `/assignments/${req.params.id}/submissions`,
+            file: `/submissions/${id}.pdf`
           }
         });
       }
@@ -261,7 +269,7 @@ router.post('/:id/submissions', validateJwt, getRole, async (req, res) => {
           error: `No assignment of id: ${req.params.id} found.`
         });
       }
-    } else res.status(401).json({ error: "You are not authorized to add this resource." });} 
+    } else res.status(401).json({ error: "You are not authorized to add this resource." });}
      catch (err) {
       console.error(err);
       res.status(500).send({

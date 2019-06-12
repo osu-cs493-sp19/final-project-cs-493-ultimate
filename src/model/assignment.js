@@ -1,7 +1,7 @@
 /*
  * Assignment schema and data accessor methods;
  */
-
+const fs = require('fs');
 const dbPool = require('../lib/database');
 const { extractValidFields } = require('../lib/validate');
 
@@ -23,8 +23,8 @@ exports.assignmentSchema = assignmentSchema;
  */
 const submissionSchema = {
   description: { required: false, type: 'string' },
-  timestamp: { required: true, type: 'string' },
-  file: { required: true, type: 'string' } 
+  timestamp: { required: true, type: 'string' }
+  //file: { required: true, type: 'string' }
 };
 exports.submissionSchema = submissionSchema;
 
@@ -176,26 +176,56 @@ exports.insertNewAssignment = insertNewAssignment;
  * Executes a MySQL query to insert a new submission into the database.  Returns
  * a Promise that resolves to the ID of the newly-created assignment entry.
  */
-function insertNewSubmission(submission,id,sId) {
+function insertNewSubmission(file,submission,id,sId) {
   return new Promise((resolve, reject) => {
-    submission = extractValidFields(submission, submissionSchema);
-    submission.id = null;
-    submission.assignmentId = id;
-    submission.studentId = sId;
-    dbPool.query(
-      'INSERT INTO submissions SET ?',  
-      submission,
-      (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result.insertId);
-        }
-      }
-    );
+    var fileData = []
+    const datastream = fs.createReadStream(file.path,'hex')
+      .on('error', (err) => {
+        reject(err);
+      })
+      .on('data', (data) => {
+        fileData.push(data);
+      })
+      .on('end', (result) => {
+        submission = extractValidFields(submission, submissionSchema);
+        submission.id = null;
+        submission.assignmentId = id;
+        submission.studentId = sId;
+        submission.filename = file.filename;
+        submission.mimeType = file.mimetype;
+        submission.fileData = fileData;
+        dbPool.query(
+          'INSERT INTO submissions SET ?',
+          submission,
+          (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result.insertId);
+            }
+          }
+        );
+      });
   });
 }
 exports.insertNewSubmission = insertNewSubmission;
+
+function getSubmissionbyID(id) {
+  return new Promise((resolve, reject) => {
+    dbPool.query(
+      'SELECT * FROM submissions where id = ?',
+      id,
+      (err, result) => {
+        if(err) {
+          reject(err);
+        } else {
+          resolve(result[0]);
+        }
+      }
+    )
+  });
+}
+exports.getSubmissionbyID = getSubmissionbyID;
 
 /*
  * Executes a MySQL query to fetch information about a single specified
@@ -244,7 +274,7 @@ function replaceAssignmentById(id, assignment) {
 exports.replaceAssignmentById = replaceAssignmentById;
 
 /*
- * Executes a MySQL query to delete a assignment specified by its ID along with it's submissions.  
+ * Executes a MySQL query to delete a assignment specified by its ID along with it's submissions.
  * Returns a Promise that resolves to true if the assignment specified by `id` existed
  * and was successfully deleted or to false otherwise.
  */
