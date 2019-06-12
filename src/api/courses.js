@@ -3,6 +3,7 @@
  */
 
 const router = require('express').Router();
+const {Parser} = require('json2csv');
 
 const { validateAgainstSchema } = require('../lib/validate');
 const { getCoursesPage, 
@@ -16,7 +17,8 @@ const { getCoursesPage,
         getStudentsByCourseId,
         getAssignmentsByCourseId,
         insertStudentsInCourse,
-        removeStudentsInCourse } = require('../model/course');
+        removeStudentsInCourse,
+        getCourseRoster } = require('../model/course');
 
 const { validateJwt,
         getRole } = require('../lib/auth');
@@ -183,6 +185,42 @@ router.post('/:id/students', validateJwt, getRole, async (req, res, next) => {
         next();
     }
 });
+
+
+router.get('/:id/roster', validateJwt, getRole, async (req, res, next) => {
+    try {
+        const fields = [{
+            label: 'ID',
+            value: 'id'
+        }, {
+            label: 'Name',
+            value: 'name'
+        }, {
+            label: 'Email',
+            value: 'email'
+        }];
+
+        const id = parseInt(req.params.id);
+        const course = await getCourseById(id);
+        if(course.instructorId === req.user || req.role === 'admin'){
+            const results = await getCourseRoster(id);
+            const json2csvParser = new Parser({fields});
+            const csv = json2csvParser.parse(results);
+
+            res.setHeader('Content-disposition', `attachment; course${id}roster`);
+            res.set('Content-Type', 'text/csv');
+            res.status(200).send(csv);
+        } else{
+            res.status(403).send({
+                error: "Unauthorized"
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        next();
+    }
+});
+
 
 
 router.get('/:id/assignments', async (req, res, next) => {

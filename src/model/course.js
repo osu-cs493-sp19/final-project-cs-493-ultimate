@@ -218,3 +218,20 @@ function removeStudentsInCourse(courseId, userIds){
     });
 }
 exports.removeStudentsInCourse = removeStudentsInCourse;
+
+function getCourseRoster(courseId){
+    return new Promise((resolve, reject) =>{
+        db.query(
+            'SELECT id, name, email FROM users JOIN enrollment ON enrollment.courseId = ? AND enrollment.userId = users.id',
+            courseId,
+            (err, results) => {
+                if(err){
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            }
+        )
+    });
+}
+exports.getCourseRoster = getCourseRoster

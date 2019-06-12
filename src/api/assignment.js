@@ -119,12 +119,12 @@ router.get('/:id/submissions', async (req, res, next) => {
         const submissionPage = await getSubmissionsPage(parseInt(req.query.page) || 1, req.params.id);
         submissionPage.links = {};
         if (submissionPage.page < submissionPage.totalPages) {
-          submissionPage.links.nextPage = `'assignments/${req.params.id}/submissions?page=${submissionPage.page + 1}`;
-          submissionPage.links.lastPage = `'assignments/${req.params.id}/submissions?page=${submissionPage.totalPages}`;
+          submissionPage.links.nextPage = `'/assignments/${req.params.id}/submissions?page=${submissionPage.page + 1}`;
+          submissionPage.links.lastPage = `'/assignments/${req.params.id}/submissions?page=${submissionPage.totalPages}`;
         }
         if (submissionPage.page > 1) {
-          submissionPage.links.prevPage = `assignments/${req.params.id}/submissions?page=${submissionPage.page - 1}`;
-          submissionPage.links.firstPage = `assignments/${req.params.id}/submissions?page=1`;
+          submissionPage.links.prevPage = `/assignments/${req.params.id}/submissions?page=${submissionPage.page - 1}`;
+          submissionPage.links.firstPage = `/assignments/${req.params.id}/submissions?page=1`;
         }
         res.status(200).send(submissionPage);
       } else {

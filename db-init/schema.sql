@@ -14,10 +14,21 @@ CREATE TABLE IF NOT EXISTS users (
     UNIQUE KEY (`email`)
 );
 
-INSERT INTO users VALUES 
-    (0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin'), /* id 1 taken already for some reason */
-    (2, 'Professor Hess', 'hessro@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor'),
-    (3, 'Jane Student', 'doej@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`) VALUES
+	(0, 'Admin', 'admin@admin.com', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'admin'),
+	(1, 'Professor Hess', 'hessro@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor'),
+	(2, 'Number 2', '2num@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(3, 'Jane Student', 'doej@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(4, 'Student 2', '2@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(5, 'Student 3', '3@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(6, 'Student 4', '4@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(7, 'Student 5', '5@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(8, 'Student 6', '6@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(9, 'Student 7', '7@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(10, 'Student 8', '8@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(11, 'Student 9', '9@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(12, 'Student 10', '10@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'student'),
+	(13, 'Other Prof', 'prof@oregonstate.edu', '$2b$10$dnk0GlkSDCID4QLl/MdlTelbH6tLB84NNRjNmxugpmeRT7Rn.FWXK', 'instructor');
 
 CREATE TABLE IF NOT EXISTS assignments (
     `id`        mediumint(9)                            NOT NULL    AUTO_INCREMENT,
@@ -49,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `courses` (
   `term` varchar(10) NOT NULL ,
   `instructorId` mediumint(9) ,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `NO DUPS` (`number`,`subject`),
+  UNIQUE KEY `NO DUPS` (`number`,`subject`, `title`),
   KEY `FK_courses_users` (`instructorId`),
   CONSTRAINT `FK_courses_users` FOREIGN KEY (`instructorId`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE SET NULL
 );
@@ -97,3 +108,31 @@ INSERT INTO `submissions` VALUES
   (23,4,3,'Need that ad revenue.', "2019-06-14T17:00:00-09:00", "example.pdf"),
   (24,4,6,'Ducktales.', "2019-06-14T17:00:00-09:00", "example.pdf"),
   (25,1,7,'Shrek.', "2019-06-14T17:00:00-09:00", "example.pdf");
+
+INSERT INTO `courses` (`id`, `subject`, `number`, `title`, `term`, `instructorId`) VALUES
+	(1, 'GEN', 101, 'General Studies', 'SP19', 1),
+	(2, 'PAC', 179, 'Fly Fishing II', 'SP19', 1),
+	(3, 'CS', 493, 'Cloud App Dev', 'SP19', 1),
+	(4, 'CS', 463, 'Capstone', 'SP19', 13),
+	(5, 'CS', 444, 'OS2', 'F19', 13),
+	(6, 'CS', 419, 'Cool Stuff', 'F19', 13),
+	(7, 'CS', 419, 'Cooler Stuff', 'F19', 13),
+	(9, 'PAC', 160, 'Bowling I', 'F19', 13),
+	(10, 'PAC', 101, 'How to Walk', 'F19', 13),
+	(11, 'PAC', 102, 'How to Run', 'W20', 13);
+
+INSERT INTO `enrollment` (`courseId`, `userId`) VALUES
+	(1, 2),
+	(1, 3),
+	(1, 4),
+	(1, 5),
+	(1, 6),
+	(1, 7),
+	(1, 8),
+	(1, 9),
+	(1, 10),
+	(1, 11),
+	(1, 12),
+	(2, 2),
+	(2, 3),
+	(2, 6);
