@@ -16,6 +16,8 @@ services:
   mysql:
     image: mysql:5
     restart: always
+    ports:
+      - 3306:3306
     volumes:
       - mysql-data:/var/lib/mysql
       - ./db-init/:/docker-entrypoint-initdb.d
@@ -25,6 +27,8 @@ services:
   redis:
     image: redis:latest
     restart: always
+    ports:
+      - 6379:6379
     
 volumes:
   mysql-data:
